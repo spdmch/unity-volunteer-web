@@ -187,7 +187,7 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter basename="/unity-volunteer-react">
+      <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
     </AuthProvider>
