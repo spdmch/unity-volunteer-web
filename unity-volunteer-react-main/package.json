@@ -1,7 +1,6 @@
 {
   "name": "unity-volunteer",
   "version": "1.0.0",
-  "homepage": ".",
   "private": true,
   "dependencies": {
     "firebase": "^12.10.0",

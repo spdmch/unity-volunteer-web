@@ -148,24 +148,22 @@ app.get('/api/initiatives/:id/ratings', async (req, res) => {
     }
 });
 
-// --- РОЗДАЧА REACT (ВИПРАВЛЕНИЙ МЕТОД) ---
-
+// Використовуємо path.resolve для точного визначення місця
 const buildPath = path.resolve(__dirname, '..', 'unity-volunteer-react-main', 'build');
-console.log("Шукаю фронтенд тут:", buildPath);
 
-// Спочатку дозволяємо серверу шукати статичні файли (картинки, js, css)
+// Діагностика: сервер напише в логи, де він шукає файли
+console.log("Шлях до фронтенду:", buildPath);
+
 app.use(express.static(buildPath));
 
-// Універсальний обробник БЕЗ вказання шляху (це вирішує PathError)
 app.use((req, res, next) => {
-    // Якщо запит починається з /api — ми пропускаємо його далі (це не для фронтенду)
-    if (req.url.startsWith('/api')) {
-        return next();
-    }
-    // Всі інші запити віддають головну сторінку React
-    res.sendFile(path.join(buildPath, 'index.html'));
-});
-
-app.listen(PORT, () => {
-    console.log(`✅ СЕРВЕР ЗАПУЩЕНО! Порт: ${PORT}`);
+    if (req.url.startsWith('/api')) return next();
+    
+    const indexPath = path.join(buildPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error("Помилка: не знайдено index.html за шляхом", indexPath);
+            res.status(404).send("Фронтенд не знайдено. Перевірте збірку.");
+        }
+    });
 });
