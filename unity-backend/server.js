@@ -4,23 +4,32 @@ const path = require('path');
 const admin = require('firebase-admin');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_key_123';
 
 // Ініціалізація Firebase
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
+    try {
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+    } catch (error) {
+        console.error("Помилка парсингу FIREBASE_SERVICE_ACCOUNT. Перевірте змінні оточення на Render:", error);
+    }
 } else {
-    const serviceAccount = require('./serviceAccountKey.json');
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
+    try {
+        const serviceAccount = require('./serviceAccountKey.json');
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount)
+        });
+    } catch (error) {
+        console.log("Локальний файл serviceAccountKey.json не знайдено, очікується змінна оточення.");
+    }
 }
 
-const db = admin.firestore();
+const db = admin.firestore ? admin.firestore() : null;
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -31,7 +40,6 @@ app.use(express.json());
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-
     if (!token) return res.status(401).json({ error: 'Доступ заборонено' });
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
@@ -61,12 +69,7 @@ app.post('/api/register', async (req, res) => {
             createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        const token = jwt.sign(
-            { id: newUser.id, email, displayName: name },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
+        const token = jwt.sign({ id: newUser.id, email, displayName: name }, JWT_SECRET, { expiresIn: '1h' });
         res.status(201).json({ token, userId: newUser.id, displayName: name });
     } catch (error) {
         res.status(500).json({ error: 'Помилка сервера при реєстрації' });
@@ -86,12 +89,7 @@ app.post('/api/login', async (req, res) => {
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(403).json({ error: 'Неправильний пароль' });
 
-        const token = jwt.sign(
-            { id: userDoc.id, email: user.email, displayName: user.displayName },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
+        const token = jwt.sign({ id: userDoc.id, email: user.email, displayName: user.displayName }, JWT_SECRET, { expiresIn: '1h' });
         res.json({ token, userId: userDoc.id, displayName: user.displayName });
     } catch (error) {
         res.status(500).json({ error: 'Помилка сервера при вході' });
@@ -116,7 +114,6 @@ app.post('/api/initiatives/:id/ratings', authenticateToken, async (req, res) => 
             value: rating,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         });
-
         res.status(200).json({ message: 'Оцінку збережено' });
     } catch (error) {
         res.status(500).json({ error: 'Помилка сервера' });
@@ -129,9 +126,7 @@ app.get('/api/initiatives/:id/ratings', async (req, res) => {
         const userId = req.query.userId;
         const ratingsSnapshot = await db.collection('initiatives').doc(initiativeId).collection('ratings').get();
 
-        if (ratingsSnapshot.empty) {
-            return res.json({ averageRating: "0.00", totalVotes: 0, userRating: 0 });
-        }
+        if (ratingsSnapshot.empty) return res.json({ averageRating: "0.00", totalVotes: 0, userRating: 0 });
 
         let sum = 0, count = 0, userRating = 0;
         ratingsSnapshot.forEach(doc => {
@@ -147,29 +142,23 @@ app.get('/api/initiatives/:id/ratings', async (req, res) => {
         res.status(500).json({ error: 'Помилка сервера' });
     }
 });
-// Вгорі файлу обов'язково має бути:
-// const fs = require('fs');
-// const path = require('path');
+
+// --- РОЗДАЧА ФРОНТЕНДУ ДЛЯ RENDER ---
 
 const buildPath = path.resolve(__dirname, '..', 'unity-volunteer-react-main', 'build');
-
-// Роздача статичних файлів
 app.use(express.static(buildPath));
 
-// Головний маршрут
-app.get('*', (req, res) => {
-    // Якщо це запит до API — не віддаємо HTML
+// Універсальний обробник БЕЗ зірочок, щоб уникнути PathError
+app.use((req, res, next) => {
     if (req.url.startsWith('/api')) {
-        return res.status(404).json({ error: 'API endpoint not found' });
+        return next(); // Пропускаємо запити до бази даних
     }
-
-    const indexPath = path.join(buildPath, 'index.html');
     
-    // Перевіряємо, чи файл взагалі існує, перш ніж відправляти
+    const indexPath = path.join(buildPath, 'index.html');
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
-        res.status(500).send("Помилка: Файли фронтенду не знайдено за шляхом: " + indexPath);
+        res.status(500).send("Сервер працює, але файли фронтенду не знайдено. Перевірте збірку React.");
     }
 });
 
