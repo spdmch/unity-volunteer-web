@@ -150,7 +150,8 @@ app.get('/api/initiatives/:id/ratings', async (req, res) => {
 
 // --- РОЗДАЧА REACT (ВИПРАВЛЕНИЙ МЕТОД) ---
 
-const buildPath = path.join(__dirname, '../unity-volunteer-react-main/build');
+const buildPath = path.resolve(__dirname, '..', 'unity-volunteer-react-main', 'build');
+console.log("Шукаю фронтенд тут:", buildPath);
 
 // Спочатку дозволяємо серверу шукати статичні файли (картинки, js, css)
 app.use(express.static(buildPath));
