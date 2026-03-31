@@ -1,7 +1,7 @@
 {
   "name": "unity-volunteer",
   "version": "1.0.0",
-  "homepage": "https://spdmch.github.io/unity-volunteer-react/",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "firebase": "^12.10.0",
