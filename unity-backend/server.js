@@ -147,23 +147,32 @@ app.get('/api/initiatives/:id/ratings', async (req, res) => {
         res.status(500).json({ error: 'Помилка сервера' });
     }
 });
+// Вгорі файлу обов'язково має бути:
+// const fs = require('fs');
+// const path = require('path');
 
-// Використовуємо path.resolve для точного визначення місця
 const buildPath = path.resolve(__dirname, '..', 'unity-volunteer-react-main', 'build');
 
-// Діагностика: сервер напише в логи, де він шукає файли
-console.log("Шлях до фронтенду:", buildPath);
-
+// Роздача статичних файлів
 app.use(express.static(buildPath));
 
-app.use((req, res, next) => {
-    if (req.url.startsWith('/api')) return next();
-    
+// Головний маршрут
+app.get('*', (req, res) => {
+    // Якщо це запит до API — не віддаємо HTML
+    if (req.url.startsWith('/api')) {
+        return res.status(404).json({ error: 'API endpoint not found' });
+    }
+
     const indexPath = path.join(buildPath, 'index.html');
-    res.sendFile(indexPath, (err) => {
-        if (err) {
-            console.error("Помилка: не знайдено index.html за шляхом", indexPath);
-            res.status(404).send("Фронтенд не знайдено. Перевірте збірку.");
-        }
-    });
+    
+    // Перевіряємо, чи файл взагалі існує, перш ніж відправляти
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(500).send("Помилка: Файли фронтенду не знайдено за шляхом: " + indexPath);
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`✅ Сервер успішно запущено на порту ${PORT}`);
 });
