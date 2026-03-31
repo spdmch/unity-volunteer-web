@@ -37,11 +37,16 @@ function RegisterPage() {
         <h2 className="auth-title">Реєстрація</h2>
         {error && <p className="auth-error">{error}</p>}
         <form onSubmit={handleSubmit} className="auth-form">
-          <input type="text" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Ім'я" required />
-          <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" required />
-          <input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Пароль" required />
-          <input type="password" value={confirm} onChange={(e)=>setConfirm(e.target.value)} placeholder="Підтвердьте пароль" required />
-          <button type="submit" disabled={loading}>{loading ? 'Завантаження...' : 'Зареєструватись'}</button>
+          {/* Додано className="auth-input" до всіх інпутів */}
+          <input type="text" className="auth-input" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Ім'я" required />
+          <input type="email" className="auth-input" value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="Email" required />
+          <input type="password" className="auth-input" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Пароль" required />
+          <input type="password" className="auth-input" value={confirm} onChange={(e)=>setConfirm(e.target.value)} placeholder="Підтвердьте пароль" required />
+          
+          {/* Додано className="auth-button" до кнопки */}
+          <button type="submit" className="auth-button" disabled={loading}>
+            {loading ? 'Завантаження...' : 'Зареєструватись'}
+          </button>
         </form>
         <p className="auth-switch">Вже є акаунт? <Link to="/login">Увійти</Link></p>
       </div>
