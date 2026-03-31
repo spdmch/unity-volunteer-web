@@ -451,7 +451,7 @@ main {
     border: 1px solid var(--border);
 }
 
-/* ===== CARD FOOTER — зірки + кнопки в одному блоці ===== */
+/* ===== CARD FOOTER ===== */
 
 .card-footer {
     margin-top: 12px;
@@ -479,7 +479,7 @@ main {
     box-shadow: 0 4px 14px rgba(108, 63, 197, 0.3);
     position: relative;
     overflow: hidden;
-    flex-shrink: 0; /* ФІКС: кнопка не стискається */
+    flex-shrink: 0;
 }
 
 .join-btn::after, .submit-btn::after {
@@ -512,7 +512,7 @@ main {
     width: 100%;
     margin-top: 14px;
     transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-    flex-shrink: 0; /* ФІКС: кнопка не стискається */
+    flex-shrink: 0;
 }
 
 .cancel-btn:hover {
@@ -682,7 +682,7 @@ main {
     margin-bottom: 6px;
 }
 
-input[type="text"], input[type="date"], textarea {
+input[type="text"], input[type="email"], input[type="password"], input[type="date"], textarea {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid var(--border);
@@ -936,7 +936,7 @@ input:focus, textarea:focus {
 
 .auth-field label { font-size: 0.88rem; font-weight: 600; color: #555; }
 
-.auth-field input {
+.auth-field input, .auth-form input {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1.5px solid #e8e4f0;
@@ -950,12 +950,12 @@ input:focus, textarea:focus {
     box-sizing: border-box;
 }
 
-.auth-field input:focus {
+.auth-field input:focus, .auth-form input:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(108, 63, 197, 0.10);
 }
 
-.auth-submit {
+.auth-submit, .auth-form button[type="submit"] {
     margin-top: 0.5rem;
     padding: 0.85rem;
     background: var(--accent);
@@ -969,8 +969,8 @@ input:focus, textarea:focus {
     transition: background 0.2s, opacity 0.2s;
 }
 
-.auth-submit:hover:not(:disabled) { background: #5530a8; }
-.auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.auth-submit:hover:not(:disabled), .auth-form button[type="submit"]:hover:not(:disabled) { background: #5530a8; }
+.auth-submit:disabled, .auth-form button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .auth-switch {
     text-align: center;
@@ -988,7 +988,7 @@ input:focus, textarea:focus {
     margin-top: 0.9rem;
     padding-top: 0.9rem;
     border-top: 1px solid #ece8f5;
-    flex-shrink: 0; /* ФІКС: зірки не стискаються і не виштовхують кнопку */
+    flex-shrink: 0;
 }
 
 .star-avg { font-size: 0.95rem; font-weight: 700; color: #d4890a; margin: 0 0 0.5rem; }
@@ -1086,19 +1086,19 @@ footer::before {
     .initiatives-grid {
         flex-direction: column;
         align-items: stretch;
-        padding-bottom: 8px;            /* ФІКС: остання картка не обрізається */
+        padding-bottom: 8px;
     }
 
     .card {
         width: 100%;
         max-width: 100%;
         padding: 20px;
-        padding-bottom: 24px;           /* ФІКС: відступ знизу щоб кнопка не обрізалась */
+        padding-bottom: 24px;
         box-sizing: border-box;
         height: auto !important;
         min-height: unset !important;
         overflow: visible !important;
-        align-self: flex-start;         /* ФІКС: картка росте під свій контент, не розтягується по найвищій */
+        align-self: flex-start;
         width: 100% !important;
     }
 
@@ -1121,7 +1121,7 @@ footer::before {
         height: auto !important;
         min-height: unset !important;
         overflow: visible !important;
-        align-self: flex-start;         /* ФІКС: картка не розтягується по висоті grid */
+        align-self: flex-start;
         width: 100% !important;
     }
 
@@ -1137,12 +1137,12 @@ footer::before {
         font-size: 0.82rem;
         padding: 10px 16px;
         margin-top: 10px;
-        display: block !important;      /* ФІКС: гарантуємо що кнопка завжди видима */
+        display: block !important;
         visibility: visible !important;
         flex-shrink: 0;
     }
 
-    .star { font-size: 1.3rem; }        /* трохи менші зірки на малих екранах */
+    .star { font-size: 1.3rem; }
 
     .status-btn { padding: 7px 14px; font-size: 0.82rem; }
 }
